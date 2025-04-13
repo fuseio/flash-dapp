@@ -37,7 +37,7 @@ const ConnectWallet = () => {
   }
 
   return (
-    <Button className="w-full rounded-full animate-pulse"></Button>
+    <Button className="w-full rounded-full animate-pulse" disabled />
   )
 }
 

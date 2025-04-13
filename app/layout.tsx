@@ -29,8 +29,10 @@ export default function RootLayout({
         className={`${monaSans.className} antialiased dark`}
       >
         <Providers>
-          <Navbar />
-          {children}
+          <div vaul-drawer-wrapper="" className="bg-background">
+            <Navbar />
+            {children}
+          </div>
         </Providers>
       </body>
       <GoogleAnalytics gaId={NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 const TokenSelector = () => {
   return (
     <Button size="xl" className="gap-1 rounded-full">
-      <Image src="/usdc.svg" alt="USDC" width={30} height={30} />
+      <Image src="/eth.svg" alt="WETH" width={30} height={30} />
       <span className="text-lg font-bold">
-        USDC
+        WETH
       </span>
       <ChevronDown />
     </Button>

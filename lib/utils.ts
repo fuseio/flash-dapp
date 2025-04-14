@@ -16,3 +16,8 @@ export function compactNumberFormat(number: number) {
     maximumFractionDigits: 2,
   }).format(number)
 }
+
+export const path = {
+  DEPOSIT: "/",
+  DASHBOARD: "/dashboard",
+}

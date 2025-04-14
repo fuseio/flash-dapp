@@ -5,12 +5,18 @@ type ADDRESSES = {
     teller: Address;
     weth: Address;
   }
+  fuse: {
+    vault: Address;
+  }
 }
 
 export const ADDRESSES: ADDRESSES = {
   ethereum: {
     teller: "0xc17Ee998335741D930D12F33581E0Ea42501Beec",
     weth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  fuse: {
+    vault: "0x445395FB71f2Dc65F80F947995af271c25807d88"
   }
 };
 

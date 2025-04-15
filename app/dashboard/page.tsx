@@ -23,6 +23,9 @@ export default function Home() {
     address: ADDRESSES.fuse.vault,
     functionName: 'balanceOf',
     args: [address as Address],
+    query: {
+      enabled: !!address,
+    },
   })
 
   return (

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useAccount, useReadContract } from "wagmi";
 import { Address, formatEther } from "viem";
+import { fuse } from "viem/chains";
 
 import { buttonVariants } from "@/components/ui/button";
 import { path } from "@/lib/utils";
@@ -23,6 +24,7 @@ export default function Home() {
     address: ADDRESSES.fuse.vault,
     functionName: 'balanceOf',
     args: [address as Address],
+    chainId: fuse.id,
     query: {
       enabled: !!address,
     },

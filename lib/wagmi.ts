@@ -12,9 +12,14 @@ const chains: readonly [Chain, ...Chain[]] = [
   mainnet,
 ]
 
+export const rpcUrls = {
+  [fuse.id]: fuse.rpcUrls.default.http[0],
+  [mainnet.id]: `https://eth-mainnet.g.alchemy.com/v2/${NEXT_PUBLIC_ETHEREUM_API_KEY}`,
+}
+
 const transports: Record<number, ReturnType<typeof http>> = {
-  [fuse.id]: http(),
-  [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${NEXT_PUBLIC_ETHEREUM_API_KEY}`),
+  [fuse.id]: http(rpcUrls[fuse.id]),
+  [mainnet.id]: http(rpcUrls[mainnet.id]),
 }
 
 export const config = createConfig({

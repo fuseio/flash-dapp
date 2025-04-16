@@ -5,7 +5,6 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import "./globals.css";
 import { Providers } from '@/components/providers'
 import { NEXT_PUBLIC_GOOGLE_ANALYTICS_ID } from "@/lib/config";
-import Navbar from "@/components/Navbar";
 
 const monaSans = localFont({
   src: './MonaSans.woff2',
@@ -30,7 +29,6 @@ export default function RootLayout({
       >
         <Providers>
           <div vaul-drawer-wrapper="" className="bg-background">
-            <Navbar />
             {children}
           </div>
         </Providers>

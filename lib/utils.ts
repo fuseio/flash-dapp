@@ -18,6 +18,11 @@ export function compactNumberFormat(number: number) {
 }
 
 export const path = {
-  DEPOSIT: "/",
+  HOME: "/",
   DASHBOARD: "/dashboard",
+  DEPOSIT: "/dashboard/deposit",
+}
+
+export function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text)
 }

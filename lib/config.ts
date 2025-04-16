@@ -1,4 +1,5 @@
 import { Address } from "viem";
+import { mainnet } from "viem/chains";
 
 type ADDRESSES = {
   ethereum: {
@@ -25,3 +26,10 @@ export const NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GOOGLE_AN
 export const NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID = process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID ?? ""
 export const NEXT_PUBLIC_ETHEREUM_API_KEY = process.env.NEXT_PUBLIC_ETHEREUM_API_KEY ?? ""
 export const NEXT_PUBLIC_COIN_GECKO_API_KEY = process.env.NEXT_PUBLIC_COIN_GECKO_API_KEY ?? ""
+export const NEXT_PUBLIC_PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY ?? ""
+
+export const USER = {
+  storageKey: 'flash_user',
+  passkeyStorageKey: 'flash_passkey_list',
+  pimlicoUrl: `https://api.pimlico.io/v2/${mainnet.id}/rpc?apikey=${NEXT_PUBLIC_PIMLICO_API_KEY}`,
+}

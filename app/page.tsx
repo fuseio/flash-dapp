@@ -1,134 +1,80 @@
 'use client'
 
-import Image from "next/image";
-import { useState } from "react";
-import { mainnet } from "viem/chains";
-import { parseEther, formatEther } from "viem";
-import { Loader2 } from "lucide-react";
+import Link from 'next/link'
+import Image from 'next/image'
+import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 
-import TokenCard from "@/components/TokenCard";
-import TokenDetail from "@/components/TokenCard/TokenDetail";
-import TokenDetails from "@/components/TokenCard/TokenDetails";
-import TokenDivider from "@/components/TokenCard/TokenDivider";
-import { Button } from "@/components/ui/button";
-import { CheckConnectionWrapper } from "@/components/CheckConnectionWrapper";
-import useDeposit from "@/hooks/useDeposit";
-import useTokenPriceUsd from "@/hooks/useTokenPriceUsd";
-import { Status } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { compactNumberFormat } from "@/lib/utils";
+import { Button } from '@/components/ui/button'
+import useUser from '@/hooks/useUser'
+import { Status } from '@/lib/types'
 
 export default function Home() {
-  const [amount, setAmount] = useState<string>("");
-  const {
-    allowance,
-    balance,
-    approve,
-    deposit,
-    approveStatus,
-    depositStatus
-  } = useDeposit();
-  const { price } = useTokenPriceUsd("weth");
-  const isLoading = approveStatus === Status.PENDING || depositStatus === Status.PENDING;
-
-  const amountWei = parseEther(amount);
-  const formattedBalance = balance ? formatEther(balance) : "0";
-
-  const getButtonText = () => {
-    if (!amount) return "Enter an amount";
-    if (!balance || balance < amountWei) return "Insufficient balance";
-    if (!allowance || allowance < amountWei) {
-      if (approveStatus === Status.PENDING) return "Approving";
-      if (approveStatus === Status.ERROR) return "Error while approving";
-      return "Approve";
-    }
-    if (depositStatus === Status.PENDING) return "Depositing";
-    if (depositStatus === Status.ERROR) return "Error while depositing";
-    if (depositStatus === Status.SUCCESS) return "Successfully deposited";
-    return "Deposit";
-  };
-
-  const handleClick = async () => {
-    if (!amount) return;
-    if (!balance || balance < amountWei) return;
-    if (!allowance || allowance < amountWei) {
-      await approve(amount);
-    } else {
-      await deposit(amount);
-    }
-  };
+  const [username, setUsername] = useState('')
+  const { signupStatus, handleSignup, loginStatus, handleLogin } = useUser()
 
   return (
-    <main className="flex flex-col gap-20 max-w-2xl mx-auto px-4 py-16">
-      <header className="flex flex-col gap-4">
-        <h1 className="text-h1 font-semibold">
-          Deposit to your saving account
-        </h1>
-        <p className="max-w-md text-xl font-medium opacity-50">
-          Earn yield on your Earn yield on your Earn yield on your Earn yield on your Earn yield on your
-        </p>
-      </header>
-      <section className="flex flex-col gap-10">
-        <div className="flex flex-col gap-1">
-          <TokenCard
-            amount={amount}
-            onAmountChange={setAmount}
-            balance={formattedBalance}
-            price={price}
-          />
-          <TokenDivider />
-          <TokenDetails>
-            <TokenDetail className="grid grid-cols-[0.4fr_1fr] items-center gap-4">
-              <div className="text-lg font-medium opacity-40">
-                You will receive
-              </div>
-              <div className="flex items-center gap-3">
-                <Image src="/eth.svg" alt="WETH" width={34} height={34} />
-                <span className="text-2xl font-semibold">
-                  {compactNumberFormat(Number(amount))} fWETH
-                </span>
-                <span className="text-lg font-medium opacity-40">
-                  {price ?
-                    `$${compactNumberFormat(Number(amount) * price)}` :
-                    <Skeleton className="w-20 h-5 rounded-sm" />
-                  }
-                </span>
-              </div>
-            </TokenDetail>
-            <TokenDetail className="grid grid-cols-[0.4fr_1fr] items-center gap-4">
-              <div className="text-lg font-medium opacity-40">
-                APY
-              </div>
-              <div className="flex items-baseline gap-6">
-                <span className="text-2xl font-semibold">
-                  4.50%
-                </span>
-                <span className="text-lg font-medium opacity-40">
-                  {price ?
-                    `Earn ~${compactNumberFormat(Number(amount) * 0.045 * price)} WETH/year` :
-                    <Skeleton className="w-20 h-5 rounded-sm" />
-                  }
-                </span>
-              </div>
-            </TokenDetail>
-          </TokenDetails>
-        </div>
-        <CheckConnectionWrapper chainId={mainnet.id} props={{ size: "xl" }}>
+    <main className="flex min-h-screen flex-col justify-between p-4">
+      <section className="grow flex flex-col justify-center items-center gap-20 w-full max-w-lg mx-auto">
+        <header className="flex items-center gap-5">
+          <Image src="/flash-logo.svg" alt="Flash logo" width={73} height={73} />
+          <Image src="/flash.svg" alt="Flash" width={153} height={78} />
+        </header>
+
+        <article className='w-full flex flex-col gap-10'>
+          <div className='flex flex-col gap-5'>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder='Choose a username'
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="h-14 px-6 rounded-card border text-lg font-semibold"
+            />
+            <Button
+              size="2xl"
+              onClick={() => handleSignup(username)}
+              disabled={signupStatus === Status.PENDING || !username}
+              className="!rounded-card border"
+            >
+              {signupStatus === Status.ERROR ?
+                'Error creating account' :
+                signupStatus === Status.PENDING ?
+                  'Creating' :
+                  'Create Account'
+              }
+              {signupStatus === Status.PENDING && <Loader2 className='size-4 animate-spin' />}
+            </Button>
+          </div>
+
+          <div className="flex justify-center items-center">OR</div>
+
           <Button
-            size="xl"
-            onClick={handleClick}
-            disabled={
-              !amount ||
-              !balance ||
-              balance < amountWei ||
-              isLoading
-            }
+            size="2xl"
+            onClick={handleLogin}
+            disabled={loginStatus === Status.PENDING}
+            variant="outline"
+            className="!rounded-card border"
           >
-            {getButtonText()}
-            {isLoading && <Loader2 className="animate-spin" />}
+            {loginStatus === Status.ERROR ?
+              'Error logging in' :
+              loginStatus === Status.PENDING ?
+                'Logging in' :
+                'Login'
+            }
+            {loginStatus === Status.PENDING && <Loader2 className='size-4 animate-spin' />}
           </Button>
-        </CheckConnectionWrapper>
+
+          <p className='text-center text-sm text-muted-foreground max-w-2xs mx-auto'>
+            By continuing, you agree with Flash <Link href="#" className='hover:underline'>Terms of Use</Link> and <Link href="#" className='hover:underline'>Privacy Policy</Link>.
+          </p>
+        </article>
       </section>
+      <footer className="text-center text-sm text-muted-foreground max-w-78 mx-auto">
+        Your Flash Account is secured with a passkey - a safer replacement for passwords. <Link href="#" className='hover:underline'>Learn more</Link>
+      </footer>
     </main>
-  );
+  )
 }

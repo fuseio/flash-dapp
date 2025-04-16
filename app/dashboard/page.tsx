@@ -49,8 +49,8 @@ export default function Home() {
           </Link>
         </div>
       </header>
-      <section className="grid grid-cols-4 w-full max-w-7xl mx-auto border border-border rounded-card overflow-hidden">
-        <article className="col-span-3 row-span-3 flex flex-col justify-between bg-card p-12 border-r border-border">
+      <section className="grid grid-cols-4 w-full max-w-7xl mx-auto border rounded-card overflow-hidden">
+        <article className="col-span-3 row-span-3 flex flex-col justify-between bg-card p-12 border-r">
           <h2 className="text-3xl font-medium">WETH Savings</h2>
           <div className="flex items-center gap-4">
             <Image src="/eth.svg" alt="WETH" width={76} height={76} />
@@ -61,11 +61,11 @@ export default function Home() {
             )}
           </div>
         </article>
-        <article className="flex flex-col gap-2.5 bg-card p-6 border-b border-border">
+        <article className="flex flex-col gap-2.5 bg-card p-6 border-b">
           <h3 className="text-lg text-primary/50 font-medium">APY</h3>
           <p className="text-2xl font-semibold">4.5%</p>
         </article>
-        <article className="flex flex-col gap-2.5 bg-card p-6 border-b border-border">
+        <article className="flex flex-col gap-2.5 bg-card p-6 border-b">
           <h3 className="text-lg text-primary/50 font-medium">1-year Projection</h3>
           <div className="flex items-center gap-1">
             <span className="text-2xl font-semibold">+450.00</span>

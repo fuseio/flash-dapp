@@ -41,7 +41,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --radius-card: calc(var(--radius) * 2);
+  --radius-twice: calc(var(--radius) * 2);
   --text-h1: var(--text-h1);
 }
 

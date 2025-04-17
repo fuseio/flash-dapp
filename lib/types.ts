@@ -10,6 +10,7 @@ export enum Status {
 
 export interface User {
   username: string
+  isAuthenticated: boolean
   passkey: PasskeyArgType
   safeAddress: Address
   isSafeDeployed: boolean

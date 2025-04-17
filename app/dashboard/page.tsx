@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import { Address, formatEther } from "viem";
 import { fuse } from "viem/chains";
 
@@ -13,20 +12,21 @@ import SavingCountUp from "@/components/SavingCountUp";
 import { Skeleton } from "@/components/ui/skeleton";
 import FuseVault from "@/lib/abis/FuseVault";
 import { ADDRESSES } from "@/lib/config";
+import useUser from "@/hooks/useUser";
 
+import { Status } from "@/lib/types";
 import Deposit from "@/assets/deposit";
 
 export default function Home() {
-  const { sdkHasLoaded } = useDynamicContext();
-  const { address } = useAccount();
+  const { user, userStatus } = useUser();
   const { data: balance, isLoading: isBalanceLoading } = useReadContract({
     abi: FuseVault,
     address: ADDRESSES.fuse.vault,
     functionName: 'balanceOf',
-    args: [address as Address],
+    args: [user?.safeAddress as Address],
     chainId: fuse.id,
     query: {
-      enabled: !!address,
+      enabled: !!user?.safeAddress,
     },
   })
 
@@ -42,19 +42,18 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center gap-5 h-20">
-          {/* TODO: Remove !important from rounded-card class */}
-          <Link href={path.DEPOSIT} className={buttonVariants({ className: "flex flex-col items-center gap-3 w-28 h-full !rounded-card" })}>
+          <Link href={path.DEPOSIT} className={buttonVariants({ className: "flex flex-col items-center gap-3 w-28 h-full rounded-twice" })}>
             <Deposit className="size-6" />
             Deposit
           </Link>
         </div>
       </header>
-      <section className="grid grid-cols-4 w-full max-w-7xl mx-auto border rounded-card overflow-hidden">
+      <section className="grid grid-cols-4 w-full max-w-7xl mx-auto border rounded-twice overflow-hidden">
         <article className="col-span-3 row-span-3 flex flex-col justify-between bg-card p-12 border-r">
           <h2 className="text-3xl font-medium">WETH Savings</h2>
           <div className="flex items-center gap-4">
             <Image src="/eth.svg" alt="WETH" width={76} height={76} />
-            {sdkHasLoaded ? (
+            {userStatus === Status.SUCCESS ? (
               <SavingCountUp />
             ) : (
               <Skeleton className="w-96 h-24 rounded-sm" />

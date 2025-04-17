@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { mainnet } from "viem/chains";
 import { parseEther, formatEther } from "viem";
 import { Fuel, Loader2 } from "lucide-react";
 
@@ -114,7 +113,7 @@ export default function Home() {
           </TokenDetails>
         </div>
         <div className="flex flex-col gap-2">
-          <CheckConnectionWrapper chainId={mainnet.id} props={{ size: "xl" }}>
+          <CheckConnectionWrapper props={{ size: "xl" }}>
             <Button
               size="xl"
               onClick={handleClick}

@@ -31,13 +31,13 @@ export default function Home() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="h-14 px-6 rounded-card border text-lg font-semibold"
+              className="h-14 px-6 rounded-twice border text-lg font-semibold"
             />
             <Button
               size="2xl"
               onClick={() => handleSignup(username)}
               disabled={signupStatus === Status.PENDING || !username}
-              className="!rounded-card border"
+              className="rounded-twice"
             >
               {signupStatus === Status.ERROR ?
                 'Error creating account' :
@@ -56,7 +56,7 @@ export default function Home() {
             onClick={handleLogin}
             disabled={loginStatus === Status.PENDING}
             variant="outline"
-            className="!rounded-card border"
+            className="rounded-twice"
           >
             {loginStatus === Status.ERROR ?
               'Error logging in' :

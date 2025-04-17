@@ -1,8 +1,5 @@
-import { createClient } from 'viem';
-import {
-  createConfig,
-  http,
-} from 'wagmi'
+import { createClient, createPublicClient } from 'viem';
+import { createConfig, http } from 'wagmi'
 import { Chain, fuse, mainnet } from 'wagmi/chains'
 
 import { NEXT_PUBLIC_ETHEREUM_API_KEY } from './config';
@@ -12,7 +9,7 @@ const chains: readonly [Chain, ...Chain[]] = [
   mainnet,
 ]
 
-export const rpcUrls = {
+export const rpcUrls: Record<number, string> = {
   [fuse.id]: fuse.rpcUrls.default.http[0],
   [mainnet.id]: `https://eth-mainnet.g.alchemy.com/v2/${NEXT_PUBLIC_ETHEREUM_API_KEY}`,
 }
@@ -33,6 +30,11 @@ export const config = createConfig({
     });
   },
 });
+
+export const publicClient = (chainId: number) => createPublicClient({
+  chain: chains.find(chain => chain.id === chainId),
+  transport: http(rpcUrls[chainId])
+})
 
 export const evmNetworks = chains.map(chain => ({
   blockExplorerUrls: [chain.blockExplorers?.default?.apiUrl],

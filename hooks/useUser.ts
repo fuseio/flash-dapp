@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import { PasskeyArgType } from "@safe-global/protocol-kit"
 import { Safe4337Pack } from '@safe-global/relay-kit'
 import { mainnet } from "viem/chains"
 
@@ -16,10 +17,16 @@ const useUser = () => {
   const [user, setUser] = useState<User>()
   const router = useRouter()
 
-  function storeUser(user: User) {
-    setUser(user)
-    localStorage.setItem(USER.storageKey, JSON.stringify(user))
-    document.cookie = `${USER.storageKey}=${user.passkey.rawId}; path=/;`
+  function storeUser(user: { [K in keyof User]?: User[K] }) {
+    setUser((prevUser) => {
+      const newUser = {
+        ...prevUser,
+        ...user
+      } as User
+      localStorage.setItem(USER.storageKey, JSON.stringify(newUser))
+      document.cookie = `${USER.storageKey}=${newUser.isAuthenticated}; path=/;`
+      return newUser
+    })
   }
 
   function loadUser() {
@@ -39,6 +46,7 @@ const useUser = () => {
       storePasskey(passkey)
       storeUser({
         username,
+        isAuthenticated: true,
         passkey,
         safeAddress: '',
         isSafeDeployed: false
@@ -60,11 +68,9 @@ const useUser = () => {
         return
       }
       const passkey = passkeys[0]
-      setUser({
-        username: '',
+      storeUser({
+        isAuthenticated: true,
         passkey,
-        safeAddress: '',
-        isSafeDeployed: false
       })
       setLoginStatus(Status.SUCCESS)
       router.replace(path.DEPOSIT)
@@ -77,8 +83,55 @@ const useUser = () => {
   function handleLogout() {
     const date = new Date(0)
     document.cookie = `${USER.storageKey}=; path=/; expires=${date.toUTCString()}`
+    storeUser({
+      isAuthenticated: false,
+    })
     router.replace(path.HOME)
   }
+
+  const safeAA = useCallback(async (passkey: PasskeyArgType) => {
+    const safeAddress = user?.safeAddress
+    const isSafe = user?.isSafeDeployed && safeAddress
+
+    const safe4337Pack = await Safe4337Pack.init({
+      provider: rpcUrls[mainnet.id],
+      signer: passkey,
+      bundlerUrl: USER.pimlicoUrl,
+      paymasterOptions: {
+        isSponsored: true,
+        paymasterUrl: USER.pimlicoUrl
+      },
+      safeModulesVersion: '0.3.0',
+      options: isSafe ? {
+        safeAddress
+      } : {
+        owners: [],
+        threshold: 1
+      }
+    })
+
+    if (isSafe) {
+      const newSafeProtocolKit = await safe4337Pack.protocolKit.connect({
+        provider: rpcUrls[mainnet.id],
+        signer: passkey,
+        safeAddress
+      })
+      safe4337Pack.protocolKit = newSafeProtocolKit
+    }
+
+    return safe4337Pack
+  }, [user?.safeAddress])
+
+  const userOpReceipt = useCallback(async (safe4337Pack: Safe4337Pack, userOperationHash: string) => {
+    let userOperationReceipt = null
+    while (!userOperationReceipt) {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      userOperationReceipt = await safe4337Pack.getUserOperationReceipt(
+        userOperationHash
+      )
+    }
+    return userOperationReceipt
+  }, [])
 
   const loadUserInfo = useCallback(async () => {
     try {
@@ -90,16 +143,7 @@ const useUser = () => {
         return
       }
 
-      const safe4337Pack = await Safe4337Pack.init({
-        provider: rpcUrls[mainnet.id],
-        signer: user.passkey,
-        bundlerUrl: USER.pimlicoUrl,
-        options: {
-          owners: [],
-          threshold: 1
-        }
-      })
-
+      const safe4337Pack = await safeAA(user.passkey)
       const safeAddress = await safe4337Pack.protocolKit.getAddress()
       const isSafeDeployed = await safe4337Pack.protocolKit.isSafeDeployed()
 
@@ -127,6 +171,8 @@ const useUser = () => {
     loginStatus,
     handleLogin,
     handleLogout,
+    safeAA,
+    userOpReceipt
   }
 }
 

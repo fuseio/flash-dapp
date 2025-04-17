@@ -39,7 +39,7 @@ const AccountCenter = () => {
       </CredenzaTrigger>
       <CredenzaContent className="grid-rows-[auto_15rem_auto] gap-8 sm:max-w-sm">
         <CredenzaHeader>
-          <CredenzaTitle>Hello, {user?.username}</CredenzaTitle>
+          <CredenzaTitle>Hello{user?.username ? `, ${user?.username}` : ''}</CredenzaTitle>
         </CredenzaHeader>
         <CredenzaBody>
           <div className="flex flex-col gap-2">

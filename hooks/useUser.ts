@@ -90,10 +90,7 @@ const useUser = () => {
   }
 
   const safeAA = useCallback(async (passkey: PasskeyArgType) => {
-    const safeAddress = user?.safeAddress
-    const isSafe = user?.isSafeDeployed && safeAddress
-
-    const safe4337Pack = await Safe4337Pack.init({
+    return Safe4337Pack.init({
       provider: rpcUrls[mainnet.id],
       signer: passkey,
       bundlerUrl: USER.pimlicoUrl,
@@ -101,26 +98,12 @@ const useUser = () => {
         isSponsored: true,
         paymasterUrl: USER.pimlicoUrl
       },
-      safeModulesVersion: '0.3.0',
-      options: isSafe ? {
-        safeAddress
-      } : {
+      options: {
         owners: [],
         threshold: 1
       }
     })
-
-    if (isSafe) {
-      const newSafeProtocolKit = await safe4337Pack.protocolKit.connect({
-        provider: rpcUrls[mainnet.id],
-        signer: passkey,
-        safeAddress
-      })
-      safe4337Pack.protocolKit = newSafeProtocolKit
-    }
-
-    return safe4337Pack
-  }, [user?.safeAddress])
+  }, [])
 
   const userOpReceipt = useCallback(async (safe4337Pack: Safe4337Pack, userOperationHash: string) => {
     let userOperationReceipt = null

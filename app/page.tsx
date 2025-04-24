@@ -11,7 +11,12 @@ import { Status } from '@/lib/types'
 
 export default function Home() {
   const [username, setUsername] = useState('')
-  const { signupStatus, handleSignup, loginStatus, handleLogin } = useUser()
+  const { signupInfo, handleSignup, loginStatus, handleLogin } = useUser()
+
+  const handleSignupForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    handleSignup(username)
+  }
 
   return (
     <main className="flex min-h-screen flex-col justify-between p-4">
@@ -22,32 +27,34 @@ export default function Home() {
         </header>
 
         <article className='w-full flex flex-col gap-10'>
-          <div className='flex flex-col gap-5'>
+          <form className='flex flex-col gap-5' onSubmit={handleSignupForm}>
             <input
               id="username"
               name="username"
               type="text"
               placeholder='Choose a username'
+              autoComplete="username webauthn"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="h-14 px-6 rounded-twice border text-lg font-semibold"
             />
             <Button
+              type="submit"
               size="2xl"
               onClick={() => handleSignup(username)}
-              disabled={signupStatus === Status.PENDING || !username}
+              disabled={signupInfo.status === Status.PENDING || !username}
               className="rounded-twice"
             >
-              {signupStatus === Status.ERROR ?
-                'Error creating account' :
-                signupStatus === Status.PENDING ?
+              {signupInfo.status === Status.ERROR ?
+                signupInfo.message || 'Error creating account' :
+                signupInfo.status === Status.PENDING ?
                   'Creating' :
                   'Create Account'
               }
-              {signupStatus === Status.PENDING && <Loader2 className='size-4 animate-spin' />}
+              {signupInfo.status === Status.PENDING && <Loader2 className='size-4 animate-spin' />}
             </Button>
-          </div>
+          </form>
 
           <div className="flex justify-center items-center">OR</div>
 

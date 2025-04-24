@@ -5,7 +5,7 @@ import { path } from '@/lib/utils'
 import { USER } from './lib/config'
 
 export function middleware(request: NextRequest) {
-  const isAuthenticated = request.cookies.get(USER.storageKey)?.value === 'true'
+  const isAuthenticated = Boolean(request.cookies.get(USER.storageKey)?.value)
   const isDashboardRoute = request.nextUrl.pathname.startsWith(path.DASHBOARD)
   const isHomeRoute = request.nextUrl.pathname === path.HOME
 

@@ -3,15 +3,29 @@ import { useCallback, useEffect, useState } from "react"
 import { PasskeyArgType } from "@safe-global/protocol-kit"
 import { Safe4337Pack } from '@safe-global/relay-kit'
 import { mainnet } from "viem/chains"
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 
 import { USER } from "@/lib/config"
-import { createPasskey, loadPasskeys, storePasskey } from "@/lib/passkeys"
 import { Status, User } from "@/lib/types"
-import { path } from "@/lib/utils"
+import { path, withRefreshToken } from "@/lib/utils"
 import { rpcUrls } from "@/lib/wagmi"
+import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthentication, verifyRegistration } from "@/lib/api"
+import { extractPasskeyData } from "@/lib/passkeys"
+
+const initUser = {
+  username: "",
+  safeAddress: "",
+  passkey: {
+    rawId: "",
+    coordinates: {
+      x: "",
+      y: ""
+    }
+  }
+}
 
 const useUser = () => {
-  const [signupStatus, setSignupStatus] = useState<Status>(Status.IDLE)
+  const [signupInfo, setSignupInfo] = useState<{ status: Status; message?: string }>({ status: Status.IDLE, message: "" })
   const [loginStatus, setLoginStatus] = useState<Status>(Status.IDLE)
   const [userStatus, setUserStatus] = useState<Status>(Status.IDLE)
   const [user, setUser] = useState<User>()
@@ -24,56 +38,78 @@ const useUser = () => {
         ...user
       } as User
       localStorage.setItem(USER.storageKey, JSON.stringify(newUser))
-      document.cookie = `${USER.storageKey}=${newUser.isAuthenticated}; path=/;`
+      document.cookie = `${USER.storageKey}=${newUser.username}; path=/;`
       return newUser
     })
   }
 
-  function loadUser() {
-    const user = localStorage.getItem(USER.storageKey)
-    if (!user) return
+  const loadUser = useCallback(() => {
+    try {
+      setUserStatus(Status.PENDING)
+      const user = localStorage.getItem(USER.storageKey)
+      if (!user) {
+        throw new Error("User not found")
+      }
 
-    const parsedUser = JSON.parse(user)
-    setUser(parsedUser)
-    return parsedUser
-  }
+      const parsedUser = JSON.parse(user)
+      setUser(parsedUser)
+      setUserStatus(Status.SUCCESS)
+
+      return parsedUser
+    } catch (error) {
+      console.log(error)
+      setUserStatus(Status.ERROR)
+    }
+  }, [])
 
   async function handleSignup(username: string) {
     try {
-      setSignupStatus(Status.PENDING)
-      const passkey = await createPasskey(username)
+      setSignupInfo({ status: Status.PENDING })
 
-      storePasskey(passkey)
-      storeUser({
-        username,
-        isAuthenticated: true,
-        passkey,
-        safeAddress: '',
-        isSafeDeployed: false
-      })
-      setSignupStatus(Status.SUCCESS)
-      router.replace(path.DEPOSIT)
-    } catch (error) {
+      const optionsJSON = await generateRegistrationOptions(username)
+      const authenticatorReponse = await startRegistration({ optionsJSON })
+
+      const passkey = await extractPasskeyData(authenticatorReponse)
+      const safe4337Pack = await safeAA(passkey)
+
+      const safeAddress = await safe4337Pack.protocolKit.getAddress()
+      const user = await withRefreshToken(
+        verifyRegistration({ safeAddress, ...authenticatorReponse }),
+        { onError: handleLogin }
+      )
+
+      if (user) {
+        storeUser(user)
+        setSignupInfo({ status: Status.SUCCESS })
+        router.push(path.DEPOSIT)
+      } else {
+        throw new Error("Error while verifying passkey registration")
+      }
+    } catch (error: any) {
+      if (error?.status === 409) {
+        setSignupInfo({ status: Status.ERROR, message: "Username already exists" })
+      } else {
+        setSignupInfo({ status: Status.ERROR })
+      }
       console.error(error)
-      setSignupStatus(Status.ERROR)
     }
   }
 
   async function handleLogin() {
     try {
       setLoginStatus(Status.PENDING)
-      const passkeys = loadPasskeys()
-      if (!passkeys?.length) {
-        setLoginStatus(Status.ERROR)
-        return
+      const optionsJSON = await generateAuthenticationOptions()
+      const authenticatorReponse = await startAuthentication({ optionsJSON })
+
+      const user = await verifyAuthentication(authenticatorReponse)
+
+      if (user) {
+        storeUser(user)
+        setSignupInfo({ status: Status.SUCCESS })
+        router.push(path.DEPOSIT)
+      } else {
+        throw new Error("Error while verifying passkey registration")
       }
-      const passkey = passkeys[0]
-      storeUser({
-        isAuthenticated: true,
-        passkey,
-      })
-      setLoginStatus(Status.SUCCESS)
-      router.replace(path.DEPOSIT)
     } catch (error) {
       console.error(error)
       setLoginStatus(Status.ERROR)
@@ -83,10 +119,8 @@ const useUser = () => {
   function handleLogout() {
     const date = new Date(0)
     document.cookie = `${USER.storageKey}=; path=/; expires=${date.toUTCString()}`
-    storeUser({
-      isAuthenticated: false,
-    })
-    router.replace(path.HOME)
+    storeUser(initUser)
+    router.push(path.HOME)
   }
 
   const safeAA = useCallback(async (passkey: PasskeyArgType) => {
@@ -116,38 +150,12 @@ const useUser = () => {
     return userOperationReceipt
   }, [])
 
-  const loadUserInfo = useCallback(async () => {
-    try {
-      setUserStatus(Status.PENDING)
-
-      const user = loadUser()
-      if (!user) {
-        setUserStatus(Status.ERROR)
-        return
-      }
-
-      const safe4337Pack = await safeAA(user.passkey)
-      const safeAddress = await safe4337Pack.protocolKit.getAddress()
-      const isSafeDeployed = await safe4337Pack.protocolKit.isSafeDeployed()
-
-      storeUser({
-        ...user,
-        safeAddress,
-        isSafeDeployed
-      })
-      setUserStatus(Status.SUCCESS)
-    } catch (error) {
-      console.error(error)
-      setUserStatus(Status.ERROR)
-    }
+  useEffect(() => {
+    loadUser()
   }, [])
 
-  useEffect(() => {
-    loadUserInfo()
-  }, [loadUserInfo])
-
   return {
-    signupStatus,
+    signupInfo,
     handleSignup,
     user,
     userStatus,

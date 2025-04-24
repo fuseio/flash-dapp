@@ -1,78 +1,49 @@
-import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
+// Safe extractPasskeyData require getPublicKey,
+// however SimpleWebAuthn serialize the data to send over JSON request,
+// so startRegistration doesn't have getPublicKey function,
+// see: https://github.com/safe-global/safe-core-sdk/blob/0b3378478e88d9303d04f314a477228b0cbe221f/packages/protocol-kit/src/utils/passkeys/extractPasskeyData.ts
+import { PasskeyArgType, PasskeyCoordinates } from "@safe-global/protocol-kit"
 
-import { USER } from './config'
+interface PasskeyAuthenticatorResponse extends AuthenticatorResponse {
+  publicKey: string;
+}
 
-/**
- * Create a passkey using WebAuthn API.
- * @returns {Promise<PasskeyArgType>} Passkey object with rawId and coordinates.
- * @throws {Error} If passkey creation fails.
- */
-export async function createPasskey(username: string): Promise<PasskeyArgType> {
-  // Generate a passkey credential using WebAuthn API
-  const passkeyCredential = await navigator.credentials.create({
-    publicKey: {
-      pubKeyCredParams: [
-        {
-          // ECDSA w/ SHA-256: https://datatracker.ietf.org/doc/html/rfc8152#section-8.1
-          alg: -7,
-          type: 'public-key'
-        }
-      ],
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      rp: {
-        name: 'Safe SmartAccount'
-      },
-      user: {
-        displayName: username,
-        id: crypto.getRandomValues(new Uint8Array(32)),
-        name: username
-      },
-      timeout: 60_000,
-      attestation: 'none'
-    }
-  })
-
-  if (!passkeyCredential) {
-    throw Error('Passkey creation failed: No credential was returned.')
+export async function decodePublicKeyForWeb(publicKey: string | ArrayBuffer): Promise<PasskeyCoordinates> {
+  const algorithm = {
+    name: 'ECDSA',
+    namedCurve: 'P-256',
+    hash: { name: 'SHA-256' }
   }
 
-  const passkey = await extractPasskeyData(passkeyCredential)
-  return passkey
+  const keyBuffer = typeof publicKey === 'string' 
+    ? Buffer.from(publicKey, 'base64')
+    : publicKey
+
+  const key = await crypto.subtle.importKey('spki', keyBuffer, algorithm, true, ['verify'])
+
+  const { x, y } = await crypto.subtle.exportKey('jwk', key)
+
+  const isValidCoordinates = !!x && !!y
+
+  if (!isValidCoordinates) {
+    throw new Error('Failed to generate passkey Coordinates. crypto.subtle.exportKey() failed')
+  }
+
+  return {
+    x: '0x' + Buffer.from(x, 'base64').toString('hex'),
+    y: '0x' + Buffer.from(y, 'base64').toString('hex')
+  }
 }
 
-/**
- * Store passkey in local storage.
- * @param {PasskeyArgType} passkey - Passkey object with rawId and coordinates.
- */
-export function storePasskey(passkey: PasskeyArgType) {
-  const passkeys = loadPasskeys()
+export async function extractPasskeyData(passkeyCredential: Credential): Promise<PasskeyArgType> {
+  const passkeyPublicKeyCredential = passkeyCredential as PublicKeyCredential
+  const passkeyPublicKeyCredentialReponse = passkeyPublicKeyCredential.response as PasskeyAuthenticatorResponse
 
-  passkeys.push(passkey)
+  const rawId = Buffer.from(passkeyPublicKeyCredential.rawId).toString('hex')
+  const coordinates = await decodePublicKeyForWeb(passkeyPublicKeyCredentialReponse.publicKey)
 
-  localStorage.setItem(USER.passkeyStorageKey, JSON.stringify(passkeys))
-}
-
-/**
- * Load passkeys from local storage.
- * @returns {PasskeyArgType[]} List of passkeys.
- */
-export function loadPasskeys(): PasskeyArgType[] {
-  const passkeysStored = localStorage.getItem(USER.passkeyStorageKey)
-
-  const passkeyIds = passkeysStored ? JSON.parse(passkeysStored) : []
-
-  return passkeyIds
-}
-
-/**
- * Get passkey object from local storage.
- * @param {string} passkeyRawId - Raw ID of the passkey.
- * @returns {PasskeyArgType} Passkey object.
- */
-export function getPasskeyFromRawId(passkeyRawId: string): PasskeyArgType {
-  const passkeys = loadPasskeys()
-
-  const passkey = passkeys.find((passkey) => passkey.rawId === passkeyRawId)!
-
-  return passkey
+  return {
+    rawId,
+    coordinates
+  }
 }

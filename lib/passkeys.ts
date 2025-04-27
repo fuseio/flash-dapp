@@ -3,10 +3,7 @@
 // so startRegistration doesn't have getPublicKey function,
 // see: https://github.com/safe-global/safe-core-sdk/blob/0b3378478e88d9303d04f314a477228b0cbe221f/packages/protocol-kit/src/utils/passkeys/extractPasskeyData.ts
 import { PasskeyArgType, PasskeyCoordinates } from "@safe-global/protocol-kit"
-
-interface PasskeyAuthenticatorResponse extends AuthenticatorResponse {
-  publicKey: string;
-}
+import { RegistrationResponseJSON } from "@simplewebauthn/browser";
 
 export async function decodePublicKeyForWeb(publicKey: string | ArrayBuffer): Promise<PasskeyCoordinates> {
   const algorithm = {
@@ -15,7 +12,7 @@ export async function decodePublicKeyForWeb(publicKey: string | ArrayBuffer): Pr
     hash: { name: 'SHA-256' }
   }
 
-  const keyBuffer = typeof publicKey === 'string' 
+  const keyBuffer = typeof publicKey === 'string'
     ? Buffer.from(publicKey, 'base64')
     : publicKey
 
@@ -35,12 +32,15 @@ export async function decodePublicKeyForWeb(publicKey: string | ArrayBuffer): Pr
   }
 }
 
-export async function extractPasskeyData(passkeyCredential: Credential): Promise<PasskeyArgType> {
-  const passkeyPublicKeyCredential = passkeyCredential as PublicKeyCredential
-  const passkeyPublicKeyCredentialReponse = passkeyPublicKeyCredential.response as PasskeyAuthenticatorResponse
+export async function extractPasskeyData(passkeyCredential: RegistrationResponseJSON): Promise<PasskeyArgType> {
+  const passkeyPublicKeyCredential = passkeyCredential
+  const publicKey = passkeyPublicKeyCredential.response.publicKey
+  if (!publicKey) {
+    throw new Error('Failed to extract passkey public key')
+  }
 
-  const rawId = Buffer.from(passkeyPublicKeyCredential.rawId).toString('hex')
-  const coordinates = await decodePublicKeyForWeb(passkeyPublicKeyCredentialReponse.publicKey)
+  const rawId = Buffer.from(passkeyPublicKeyCredential.rawId, 'base64').toString('hex')
+  const coordinates = await decodePublicKeyForWeb(publicKey)
 
   return {
     rawId,

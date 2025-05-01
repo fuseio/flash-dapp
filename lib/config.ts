@@ -27,6 +27,7 @@ export const NEXT_PUBLIC_ETHEREUM_API_KEY = process.env.NEXT_PUBLIC_ETHEREUM_API
 export const NEXT_PUBLIC_COIN_GECKO_API_KEY = process.env.NEXT_PUBLIC_COIN_GECKO_API_KEY ?? ""
 export const NEXT_PUBLIC_PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY ?? ""
 export const NEXT_PUBLIC_FLASH_API_BASE_URL = process.env.NEXT_PUBLIC_FLASH_API_BASE_URL ?? ""
+export const NEXT_PUBLIC_FLASH_ANALYTICS_API_BASE_URL = process.env.NEXT_PUBLIC_FLASH_ANALYTICS_API_BASE_URL ?? ""
 
 export const USER = {
   storageKey: 'flash_user',

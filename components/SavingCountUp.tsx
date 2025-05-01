@@ -1,45 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
-import { useCountUp } from 'react-countup';
+import { useState, useEffect } from 'react';
 
-const SavingCountUp = () => {
-  const [saving, setSaving] = useState(10000.9462136);
-  const wholeNumberRef = useRef<HTMLElement>(null!);
-  const decimalRef = useRef<HTMLElement>(null!);
-  const decimalCount = Number((saving % 1).toFixed(7).split('.')[1])
+interface SavingCountUpProps {
+  balance: number;
+  apy: number;
+  lastTimestamp: number;
+}
 
-  const { start: startWhole } = useCountUp({
-    ref: wholeNumberRef,
-    start: Math.trunc(saving),
-    end: Math.trunc(saving),
-    duration: 0.1,
-  });
+const SECONDS_PER_YEAR = 31_557_600;
 
-  const { start: startDecimal } = useCountUp({
-    ref: decimalRef,
-    start: decimalCount,
-    end: decimalCount,
-    duration: 0.1,
-    separator: '',
-  });
+const SavingCountUp = ({ balance, apy, lastTimestamp }: SavingCountUpProps) => {
+  const [liveYield, setLiveYield] = useState<number>(0);
+
+  const calculateLiveYield = (currentTime: number) => {
+    const deltaTime = currentTime - lastTimestamp;
+    const yieldEarned = balance * (apy / SECONDS_PER_YEAR) * deltaTime;
+    return yieldEarned;
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSaving(prev => Number((prev + 0.0000001).toFixed(7)));
-    }, 1000);
+    const updateYield = () => {
+      const now = Math.floor(Date.now() / 1000);
+      setLiveYield(calculateLiveYield(now));
+    };
 
+    updateYield();
+
+    const interval = setInterval(updateYield, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [balance, apy, lastTimestamp]);
 
-  useEffect(() => {
-    startWhole();
-    startDecimal();
-  }, [saving, startWhole, startDecimal]);
+  const wholeNumber = Math.floor(liveYield);
+  const decimalPart = (liveYield - wholeNumber).toFixed(7).slice(1);
 
   return (
     <div>
-      <span ref={wholeNumberRef} className="text-8xl font-medium" />
-      <span className="text-h1 font-medium">.</span>
-      <span ref={decimalRef} className="text-h1 font-medium" />
+      <span className="text-8xl font-medium">{wholeNumber}</span>
+      <span className="text-h1 font-medium">{decimalPart}</span>
     </div>
   );
 };

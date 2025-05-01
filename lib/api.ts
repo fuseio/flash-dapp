@@ -1,6 +1,8 @@
+import axios from "axios";
 import { AuthenticationResponseJSON } from "@simplewebauthn/browser";
-import { NEXT_PUBLIC_FLASH_API_BASE_URL } from "./config";
-import { RegistrationResponse, User } from "./types";
+
+import { NEXT_PUBLIC_FLASH_ANALYTICS_API_BASE_URL, NEXT_PUBLIC_FLASH_API_BASE_URL } from "./config";
+import { RegistrationResponse, TokenTransfer, User } from "./types";
 
 export const refreshToken = () => {
   return fetch(`${NEXT_PUBLIC_FLASH_API_BASE_URL}/accounts/v1/auths/refresh-token`, {
@@ -20,7 +22,6 @@ export const generateRegistrationOptions = async (username: string) => {
     credentials: 'include',
     body: JSON.stringify({ username }),
   });
-  
   if (!response.ok) throw response;
   return response.json();
 };
@@ -58,3 +59,13 @@ export const verifyAuthentication = async (authenticationResponse: Authenticatio
   if (!response.ok) throw response;
   return response.json();
 };
+
+export const fetchTotalAPY = async (): Promise<number> => {
+  const response = await axios.get(`${NEXT_PUBLIC_FLASH_ANALYTICS_API_BASE_URL}/analytics/v1/yields/total-apy`)
+  return response.data;
+};
+
+export const fetchTokenTransfer = async (address: string, token: string, type: string = "ERC-20", filter: string = "to"): Promise<TokenTransfer> => {
+  const response = await axios.get(`https://explorer.fuse.io/api/v2/addresses/${address}/token-transfers?type=${type}&filter=${filter}&token=${token}`)
+  return response.data;
+}

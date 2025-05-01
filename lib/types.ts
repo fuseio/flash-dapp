@@ -21,3 +21,9 @@ export interface User {
 export interface RegistrationResponse extends RegistrationResponseJSON {
   safeAddress: Address
 }
+
+export interface TokenTransfer {
+  items: {
+    timestamp: string
+  }[]
+}

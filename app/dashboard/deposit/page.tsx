@@ -16,6 +16,7 @@ import useTokenPriceUsd from "@/hooks/useTokenPriceUsd";
 import { Status } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { compactNumberFormat } from "@/lib/utils";
+import { useTotalAPY } from "@/hooks/useAnalytics";
 
 export default function Home() {
   const [amount, setAmount] = useState<string>("");
@@ -29,6 +30,7 @@ export default function Home() {
   } = useDeposit();
   const { price } = useTokenPriceUsd("weth");
   const isLoading = approveStatus === Status.PENDING || depositStatus === Status.PENDING;
+  const { data: totalAPY } = useTotalAPY()
 
   const amountWei = parseEther(amount);
   const formattedBalance = balance ? formatEther(balance) : "0";
@@ -100,12 +102,15 @@ export default function Home() {
               </div>
               <div className="flex items-baseline gap-6">
                 <span className="text-2xl font-semibold">
-                  4.50%
+                  {totalAPY ?
+                    `${totalAPY.toFixed(2)}%` :
+                    <Skeleton className="w-20 h-8 rounded-sm" />
+                  }
                 </span>
                 <span className="text-lg font-medium opacity-40">
-                  {price ?
-                    `Earn ~${compactNumberFormat(Number(amount) * 0.045 * price)} WETH/year` :
-                    <Skeleton className="w-20 h-5 rounded-sm" />
+                  {price && totalAPY ?
+                    `Earn ~${compactNumberFormat(Number(amount) * (totalAPY / 100) * price)} WETH/year` :
+                    <Skeleton className="w-20 h-6 rounded-sm" />
                   }
                 </span>
               </div>

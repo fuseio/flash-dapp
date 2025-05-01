@@ -13,12 +13,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import FuseVault from "@/lib/abis/FuseVault";
 import { ADDRESSES } from "@/lib/config";
 import useUser from "@/hooks/useUser";
+import { useLatestTokenTransfer, useTotalAPY } from "@/hooks/useAnalytics";
 
-import { Status } from "@/lib/types";
 import Deposit from "@/assets/deposit";
 
 export default function Home() {
-  const { user, userStatus } = useUser();
+  const { user } = useUser();
   const { data: balance, isLoading: isBalanceLoading } = useReadContract({
     abi: FuseVault,
     address: ADDRESSES.fuse.vault,
@@ -29,6 +29,8 @@ export default function Home() {
       enabled: !!user?.safeAddress,
     },
   })
+  const { data: totalAPY } = useTotalAPY()
+  const { data: lastTimestamp } = useLatestTokenTransfer(user?.safeAddress ?? "", ADDRESSES.fuse.vault)
 
   return (
     <main className="flex flex-col gap-20 px-4 py-16">
@@ -53,8 +55,12 @@ export default function Home() {
           <h2 className="text-3xl font-medium">WETH Savings</h2>
           <div className="flex items-center gap-4">
             <Image src="/eth.svg" alt="WETH" width={76} height={76} />
-            {userStatus === Status.SUCCESS ? (
-              <SavingCountUp />
+            {(balance && totalAPY && lastTimestamp) ? (
+              <SavingCountUp
+                balance={Number(formatEther(balance))}
+                apy={totalAPY}
+                lastTimestamp={lastTimestamp / 1000}
+              />
             ) : (
               <Skeleton className="w-96 h-24 rounded-sm" />
             )}
@@ -62,12 +68,22 @@ export default function Home() {
         </article>
         <article className="flex flex-col gap-2.5 bg-card p-6 border-b">
           <h3 className="text-lg text-primary/50 font-medium">APY</h3>
-          <p className="text-2xl font-semibold">4.5%</p>
+          <div className="text-2xl font-semibold">
+            {totalAPY ?
+              `${totalAPY.toFixed(2)}%`
+              : <Skeleton className="w-20 h-8 rounded-sm" />
+            }
+          </div>
         </article>
         <article className="flex flex-col gap-2.5 bg-card p-6 border-b">
           <h3 className="text-lg text-primary/50 font-medium">1-year Projection</h3>
           <div className="flex items-center gap-1">
-            <span className="text-2xl font-semibold">+450.00</span>
+            <div className="flex items-center gap-1 text-2xl font-semibold">+{
+              (totalAPY && balance) ?
+                `${(totalAPY * Number(formatEther(balance))).toFixed(2)}` :
+                <Skeleton className="w-20 h-8 rounded-sm" />
+            }
+            </div>
             <Image src="/eth.svg" alt="WETH" width={16} height={16} />
           </div>
         </article>
@@ -77,7 +93,9 @@ export default function Home() {
             {isBalanceLoading ? (
               <Skeleton className="w-24 h-8 rounded-sm" />
             ) : (
-              <span className="text-2xl font-semibold">{formatEther(balance ?? BigInt(0))}</span>
+              <span className="text-2xl font-semibold">
+                {formatEther(balance ?? BigInt(0))}
+              </span>
             )}
             <Image src="/eth.svg" alt="WETH" width={16} height={16} />
           </div>

@@ -108,8 +108,8 @@ export default function Home() {
                   }
                 </span>
                 <span className="text-lg font-medium opacity-40">
-                  {price && totalAPY ?
-                    `Earn ~${compactNumberFormat(Number(amount) * (totalAPY / 100) * price)} WETH/year` :
+                  {totalAPY ?
+                    `Earn ~${compactNumberFormat(Number(amount) * (totalAPY / 100))} WETH/year` :
                     <Skeleton className="w-20 h-6 rounded-sm" />
                   }
                 </span>

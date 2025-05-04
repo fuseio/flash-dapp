@@ -33,10 +33,10 @@ export default function Home() {
   const { data: lastTimestamp } = useLatestTokenTransfer(user?.safeAddress ?? "", ADDRESSES.fuse.vault)
 
   return (
-    <main className="flex flex-col gap-20 px-4 py-16">
-      <header className="flex justify-between items-center w-full max-w-7xl mx-auto">
+    <main className="flex flex-col gap-12 md:gap-20 px-4 pt-8 pb-20 md:py-16">
+      <header className="flex flex-col md:flex-row justify-between md:items-center gap-y-4 w-full max-w-7xl mx-auto">
         <div className="flex flex-col gap-4">
-          <h1 className="text-h1 font-semibold">
+          <h1 className="text-h1 leading-tight font-semibold">
             Your saving account
           </h1>
           <p className="max-w-md text-xl font-medium opacity-50">
@@ -50,11 +50,12 @@ export default function Home() {
           </Link>
         </div>
       </header>
-      <section className="grid grid-cols-4 w-full max-w-7xl mx-auto border rounded-twice overflow-hidden">
-        <article className="col-span-3 row-span-3 flex flex-col justify-between bg-card p-12 border-r">
+      <section className="grid grid-cols-1 md:grid-cols-4 w-full max-w-7xl mx-auto border rounded-twice overflow-hidden">
+        <article className="md:col-span-3 md:row-span-3 flex flex-col justify-between gap-4 bg-card p-6 md:p-12 border-b md:border-b-0 md:border-r">
           <h2 className="text-3xl font-medium">WETH Savings</h2>
-          <div className="flex items-center gap-4">
-            <Image src="/eth.svg" alt="WETH" width={76} height={76} />
+          <div className="flex items-center gap-2 md:gap-4">
+            <Image src="/eth.svg" alt="WETH" width={76} height={76} className="hidden md:block" />
+            <Image src="/eth.svg" alt="WETH" width={36} height={36} className="block md:hidden" />
             {(balance && totalAPY && lastTimestamp) ? (
               <SavingCountUp
                 balance={Number(formatEther(balance))}
@@ -62,7 +63,7 @@ export default function Home() {
                 lastTimestamp={lastTimestamp / 1000}
               />
             ) : (
-              <Skeleton className="w-96 h-24 rounded-sm" />
+              <Skeleton className="w-48 h-10 md:w-96 md:h-24 rounded-sm" />
             )}
           </div>
         </article>

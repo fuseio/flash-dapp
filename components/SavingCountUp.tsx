@@ -34,8 +34,8 @@ const SavingCountUp = ({ balance, apy, lastTimestamp }: SavingCountUpProps) => {
 
   return (
     <div>
-      <span className="text-8xl font-medium">{wholeNumber}</span>
-      <span className="text-h1 font-medium">{decimalPart}</span>
+      <span className="text-4xl md:text-8xl font-medium">{wholeNumber}</span>
+      <span className="text-2xl md:text-h1 font-medium">{decimalPart}</span>
     </div>
   );
 };

@@ -60,16 +60,16 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col gap-20 max-w-2xl mx-auto px-4 py-16">
+    <main className="flex flex-col gap-20 max-w-2xl mx-auto px-4 pt-8 pb-20 md:py-16">
       <header className="flex flex-col gap-4">
-        <h1 className="text-h1 font-semibold">
+        <h1 className="text-h1 leading-tight font-semibold">
           Deposit to your saving account
         </h1>
         <p className="max-w-md text-xl font-medium opacity-50">
           Earn yield on your Earn yield on your Earn yield on your Earn yield on your Earn yield on your
         </p>
       </header>
-      <section className="flex flex-col gap-10">
+      <section className="flex flex-col gap-4 md:gap-10">
         <div className="flex flex-col gap-1">
           <TokenCard
             amount={amount}
@@ -79,7 +79,7 @@ export default function Home() {
           />
           <TokenDivider />
           <TokenDetails>
-            <TokenDetail className="grid grid-cols-[0.4fr_1fr] items-center gap-4">
+            <TokenDetail className="grid grid-cols-1 md:grid-cols-[0.4fr_1fr] items-center gap-4">
               <div className="text-lg font-medium opacity-40">
                 You will receive
               </div>
@@ -96,18 +96,18 @@ export default function Home() {
                 </span>
               </div>
             </TokenDetail>
-            <TokenDetail className="grid grid-cols-[0.4fr_1fr] items-center gap-4">
+            <TokenDetail className="grid grid-cols-1 md:grid-cols-[0.4fr_1fr] items-center gap-4">
               <div className="text-lg font-medium opacity-40">
                 APY
               </div>
-              <div className="flex items-baseline gap-6">
+              <div className="flex items-baseline gap-2 md:gap-6">
                 <span className="text-2xl font-semibold">
                   {totalAPY ?
                     `${totalAPY.toFixed(2)}%` :
                     <Skeleton className="w-20 h-8 rounded-sm" />
                   }
                 </span>
-                <span className="text-lg font-medium opacity-40">
+                <span className="text-sm md:text-lg font-medium opacity-40">
                   {totalAPY ?
                     `Earn ~${compactNumberFormat(Number(amount) * (totalAPY / 100))} WETH/year` :
                     <Skeleton className="w-20 h-6 rounded-sm" />

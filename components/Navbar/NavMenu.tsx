@@ -10,26 +10,15 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { path } from "@/lib/utils";
-
-const navItems = [
-  {
-    label: "Deposit",
-    href: path.DEPOSIT,
-  },
-  {
-    label: "Dashboard",
-    href: path.DASHBOARD,
-  },
-]
+import { menuItems } from "@/lib/menu"
 
 export function NavMenu() {
   const pathname = usePathname()
 
   return (
-    <NavigationMenu>
+    <NavigationMenu className="hidden md:block">
       <NavigationMenuList>
-        {navItems.map((item) => (
+        {menuItems.map((item) => (
           <NavigationMenuItem key={item.label}>
             <Link href={item.href} legacyBehavior passHref>
               <NavigationMenuLink

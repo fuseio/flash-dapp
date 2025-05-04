@@ -11,16 +11,16 @@ interface TokenCardProps {
 
 const TokenCard = ({ amount, onAmountChange, balance, price }: TokenCardProps) => {
   return (
-    <article className="flex flex-col gap-1 bg-card border rounded-twice p-10">
+    <article className="flex flex-col gap-2 md:gap-1 bg-card border rounded-twice p-6 md:p-10">
       <div className="text-lg font-medium opacity-40">
         Amount to deposit
       </div>
-      <div className="flex justify-between items-center gap-12">
+      <div className="flex justify-between items-center gap-4 md:gap-12">
         <TokenSelector />
         <div className="flex flex-col w-full text-right">
           <input
             type="number"
-            className="number-input w-full outline-none bg-transparent text-right text-5xl font-semibold leading-none"
+            className="number-input w-full outline-none bg-transparent text-right text-2xl md:text-5xl font-semibold leading-none"
             value={amount}
             placeholder="0"
             onChange={(e) => onAmountChange(e.target.value)}

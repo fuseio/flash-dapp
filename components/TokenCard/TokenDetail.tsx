@@ -9,7 +9,7 @@ interface TokenDetailProps {
 
 const TokenDetail = ({ children, className = '' }: TokenDetailProps) => {
   return (
-    <div className={cn("p-10", className)}>
+    <div className={cn("p-6 md:p-10", className)}>
       {children}
     </div>
   );

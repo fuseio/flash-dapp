@@ -1,12 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import TokenSelector from "./TokenSelector";
+import TokenSelectorModal from "../TokenSelector/TokenSelectorModal";
 import { compactNumberFormat } from "@/lib/utils";
 
 interface TokenCardProps {
   amount: string;
   onAmountChange: (value: string) => void;
   balance: string;
-  price: number | null;
+  price: number | undefined;
 }
 
 const TokenCard = ({ amount, onAmountChange, balance, price }: TokenCardProps) => {
@@ -16,7 +16,7 @@ const TokenCard = ({ amount, onAmountChange, balance, price }: TokenCardProps) =
         Amount to deposit
       </div>
       <div className="flex justify-between items-center gap-4 md:gap-12">
-        <TokenSelector />
+        <TokenSelectorModal />
         <div className="flex flex-col w-full text-right">
           <input
             type="number"

@@ -27,3 +27,23 @@ export interface TokenTransfer {
     timestamp: string
   }[]
 }
+
+export type Token = {
+  name: string;
+  address: Address;
+  symbol: string;
+  decimals: number;
+  image: string;
+  coingeckoId: string;
+  isComingSoon?: boolean;
+}
+
+export type TokenMap = {
+  [key in number]: Token[];
+}
+
+export type TokenPriceUsd = {
+  [key: string]: {
+    usd: number;
+  };
+};

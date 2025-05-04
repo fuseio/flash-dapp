@@ -12,7 +12,7 @@ import TokenDivider from "@/components/TokenCard/TokenDivider";
 import { Button } from "@/components/ui/button";
 import { CheckConnectionWrapper } from "@/components/CheckConnectionWrapper";
 import useDeposit from "@/hooks/useDeposit";
-import useTokenPriceUsd from "@/hooks/useTokenPriceUsd";
+import { useTokenPriceUsd } from "@/hooks/useToken";
 import { Status } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { compactNumberFormat } from "@/lib/utils";
@@ -28,7 +28,7 @@ export default function Home() {
     approveStatus,
     depositStatus
   } = useDeposit();
-  const { price } = useTokenPriceUsd("weth");
+  const { data: price } = useTokenPriceUsd("weth");
   const isLoading = approveStatus === Status.PENDING || depositStatus === Status.PENDING;
   const { data: totalAPY } = useTotalAPY()
 

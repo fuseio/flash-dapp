@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useReadContract } from "wagmi";
+import { useBalance, useReadContract } from "wagmi";
 import {
   encodeFunctionData,
   Hash,

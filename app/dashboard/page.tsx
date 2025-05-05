@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useReadContract } from "wagmi";
-import { Address, formatEther } from "viem";
+import { Address, formatEther, formatUnits } from "viem";
 import { fuse } from "viem/chains";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -52,10 +52,10 @@ export default function Home() {
       </header>
       <section className="grid grid-cols-1 md:grid-cols-4 w-full max-w-7xl mx-auto border rounded-twice overflow-hidden">
         <article className="md:col-span-3 md:row-span-3 flex flex-col justify-between gap-4 bg-card p-6 md:p-12 border-b md:border-b-0 md:border-r">
-          <h2 className="text-3xl font-medium">WETH Savings</h2>
+          <h2 className="text-3xl font-medium">USDC Savings</h2>
           <div className="flex items-center gap-2 md:gap-4">
-            <Image src="/eth.svg" alt="WETH" width={76} height={76} className="hidden md:block" />
-            <Image src="/eth.svg" alt="WETH" width={36} height={36} className="block md:hidden" />
+            <Image src="/usdc.svg" alt="WETH" width={76} height={76} className="hidden md:block" />
+            <Image src="/usdc.svg" alt="WETH" width={36} height={36} className="block md:hidden" />
             {(balance && totalAPY && lastTimestamp) ? (
               <SavingCountUp
                 balance={Number(formatEther(balance))}
@@ -85,20 +85,20 @@ export default function Home() {
                 <Skeleton className="w-20 h-8 rounded-sm" />
             }
             </div>
-            <Image src="/eth.svg" alt="WETH" width={16} height={16} />
+            <Image src="/usdc.svg" alt="WETH" width={16} height={16} />
           </div>
         </article>
         <article className="flex flex-col gap-2.5 bg-card p-6">
-          <h3 className="text-lg text-primary/50 font-medium">Your fWETH Balance</h3>
+          <h3 className="text-lg text-primary/50 font-medium">Your fUSDC Balance</h3>
           <div className="flex items-center gap-1">
             {isBalanceLoading ? (
               <Skeleton className="w-24 h-8 rounded-sm" />
             ) : (
               <span className="text-2xl font-semibold">
-                {formatEther(balance ?? BigInt(0))}
+                {formatUnits(balance ?? BigInt(0), 6)}
               </span>
             )}
-            <Image src="/eth.svg" alt="WETH" width={16} height={16} />
+            <Image src="/usdc.svg" alt="WETH" width={16} height={16} />
           </div>
         </article>
       </section>

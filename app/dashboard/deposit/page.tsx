@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { parseEther, formatEther } from "viem";
+import { parseUnits, formatUnits } from "viem";
 import { Fuel, Loader2 } from "lucide-react";
 
 import TokenCard from "@/components/TokenCard";
@@ -28,12 +28,12 @@ export default function Home() {
     approveStatus,
     depositStatus
   } = useDeposit();
-  const { data: price } = useTokenPriceUsd("weth");
+  const { data: price } = useTokenPriceUsd("usdc");
   const isLoading = approveStatus === Status.PENDING || depositStatus === Status.PENDING;
   const { data: totalAPY } = useTotalAPY()
 
-  const amountWei = parseEther(amount);
-  const formattedBalance = balance ? formatEther(balance) : "0";
+  const amountWei = parseUnits(amount, 6);
+  const formattedBalance = balance ? formatUnits(balance, 6) : "0";
 
   const getButtonText = () => {
     if (!amount) return "Enter an amount";
@@ -75,7 +75,7 @@ export default function Home() {
             amount={amount}
             onAmountChange={setAmount}
             balance={formattedBalance}
-            price={price}
+            price={1}
           />
           <TokenDivider />
           <TokenDetails>
@@ -84,9 +84,9 @@ export default function Home() {
                 You will receive
               </div>
               <div className="flex items-center gap-3">
-                <Image src="/eth.svg" alt="WETH" width={34} height={34} />
+                <Image src="/usdc.svg" alt="WETH" width={34} height={34} />
                 <span className="text-2xl font-semibold">
-                  {compactNumberFormat(Number(amount))} fWETH
+                  {compactNumberFormat(Number(amount))} fUSDC
                 </span>
                 <span className="text-lg font-medium opacity-40">
                   {price ?

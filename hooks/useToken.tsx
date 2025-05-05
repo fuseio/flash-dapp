@@ -1,4 +1,4 @@
-import { Address, formatEther } from "viem";
+import { Address, formatEther, formatUnits } from "viem";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
@@ -10,18 +10,21 @@ import { fetchTokenPriceUsd } from "@/lib/api";
 type TokenSelectorProps = {
   tokens: Token[];
   safeAddress?: Address;
-}
+};
 
 export const useTokenPriceUsd = (tokenId: string) => {
   return useQuery({
     queryKey: ["tokenPriceUsd", tokenId],
     queryFn: () => fetchTokenPriceUsd(tokenId),
-    enabled: !!tokenId
+    enabled: !!tokenId,
   });
 };
 
-export const useTokenSelector = ({ tokens, safeAddress }: TokenSelectorProps) => {
-  const tokensWithBalance = tokens.map(token => {
+export const useTokenSelector = ({
+  tokens,
+  safeAddress,
+}: TokenSelectorProps) => {
+  const tokensWithBalance = tokens.map((token) => {
     const { data: balance } = useReadContract({
       abi: ERC20_ABI,
       address: token.address,
@@ -37,12 +40,15 @@ export const useTokenSelector = ({ tokens, safeAddress }: TokenSelectorProps) =>
 
     return {
       ...token,
-      balance: balance ? Number(formatEther(balance)) : 0,
-      balanceUSD: balance && price ? Number(formatEther(balance)) * price : 0
+      balance: balance ? Number(formatUnits(balance, token.decimals)) : 0,
+      balanceUSD:
+        balance && price
+          ? Number(formatUnits(balance, token.decimals)) * price
+          : 0,
     };
   });
 
   return {
-    tokensWithBalance
+    tokensWithBalance,
   };
 };

@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useReadContract } from "wagmi";
-import { encodeFunctionData, Hash, parseEther, type Address } from "viem";
+import {
+  encodeFunctionData,
+  Hash,
+  parseEther,
+  parseUnits,
+  encodeAbiParameters,
+  type Address,
+  parseAbiParameters,
+  formatEther,
+} from "viem";
 import { mainnet } from "viem/chains";
 
 import ERC20_ABI from "@/lib/abis/ERC20";
@@ -28,7 +37,7 @@ const useDeposit = (): DepositResult => {
 
   const { data: balance } = useReadContract({
     abi: ERC20_ABI,
-    address: ADDRESSES.ethereum.weth,
+    address: ADDRESSES.ethereum.usdc,
     functionName: "balanceOf",
     args: [user?.safeAddress as Address],
     chainId: mainnet.id,
@@ -39,13 +48,26 @@ const useDeposit = (): DepositResult => {
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     abi: ERC20_ABI,
-    address: ADDRESSES.ethereum.weth,
+    address: ADDRESSES.ethereum.usdc,
     functionName: "allowance",
-    args: [user?.safeAddress as Address, ADDRESSES.ethereum.teller],
+    args: [user?.safeAddress as Address, ADDRESSES.ethereum.vault],
     chainId: mainnet.id,
     query: {
       enabled: !!user?.safeAddress,
     },
+  });
+
+  const { data: fee, refetch: refetchFee } = useReadContract({
+    abi: ETHEREUM_TELLER_ABI,
+    address: ADDRESSES.ethereum.teller,
+    functionName: "previewFee",
+    args: [
+      BigInt(0),
+      user?.safeAddress as Address,
+      encodeAbiParameters(parseAbiParameters("uint32"), [30138]),
+      ADDRESSES.ethereum.nativeFeeToken,
+    ],
+    chainId: mainnet.id,
   });
 
   const approve = async (amount: string) => {
@@ -57,42 +79,48 @@ const useDeposit = (): DepositResult => {
       setApproveStatus(Status.PENDING);
       setError(null);
 
-      const amountWei = parseEther(amount);
+      const amountWei = parseUnits(amount, 6);
       if (balance && balance < amountWei) {
-        throw new Error("Insufficient WETH balance");
+        throw new Error("Insufficient USDC balance");
       }
 
-      const safe4337Pack = await safeAA(user.passkey)
+      const safe4337Pack = await safeAA(user.passkey);
       const approveTransaction = {
-        to: ADDRESSES.ethereum.weth,
+        to: ADDRESSES.ethereum.usdc,
         data: encodeFunctionData({
           abi: ERC20_ABI,
-          functionName: 'approve',
-          args: [ADDRESSES.ethereum.teller, amountWei],
+          functionName: "approve",
+          args: [ADDRESSES.ethereum.vault, amountWei],
         }),
-        value: '0'
-      }
+        value: "0",
+      };
 
       const safeOperation = await safe4337Pack.createTransaction({
-        transactions: [approveTransaction]
-      })
-      const signedSafeOperation = await safe4337Pack.signSafeOperation(safeOperation)
+        transactions: [approveTransaction],
+      });
+      const signedSafeOperation = await safe4337Pack.signSafeOperation(
+        safeOperation
+      );
 
       const userOperationHash = await safe4337Pack.executeTransaction({
-        executable: signedSafeOperation
-      })
-      const userOperationReceipt = await userOpReceipt(safe4337Pack, userOperationHash)
+        executable: signedSafeOperation,
+      });
+      const userOperationReceipt = await userOpReceipt(
+        safe4337Pack,
+        userOperationHash
+      );
       if (!userOperationReceipt.success) {
         throw new Error("User operation failed");
       }
 
-      const transactionHash = userOperationReceipt.receipt.transactionHash as Hash
-      const transaction = await publicClient(mainnet.id).waitForTransactionReceipt(
-        { hash: transactionHash }
-      )
+      const transactionHash = userOperationReceipt.receipt
+        .transactionHash as Hash;
+      const transaction = await publicClient(
+        mainnet.id
+      ).waitForTransactionReceipt({ hash: transactionHash });
 
       await refetchAllowance();
-      if (transaction.status === 'success') {
+      if (transaction.status === "success") {
         setApproveStatus(Status.SUCCESS);
       } else {
         throw new Error("Approval failed");
@@ -113,44 +141,59 @@ const useDeposit = (): DepositResult => {
       setDepositStatus(Status.PENDING);
       setError(null);
 
-      const amountWei = parseEther(amount);
+      const amountWei = parseUnits(amount, 6);
       if (balance && balance < amountWei) {
-        throw new Error("Insufficient WETH balance");
+        throw new Error("Insufficient USDC balance");
       }
 
       if (allowance && allowance < amountWei) {
         throw new Error("Insufficient allowance. Please approve first.");
       }
 
-      const safe4337Pack = await safeAA(user.passkey)
+      const safe4337Pack = await safeAA(user.passkey);
+
       const depositTransaction = {
         to: ADDRESSES.ethereum.teller,
         data: encodeFunctionData({
           abi: ETHEREUM_TELLER_ABI,
-          functionName: "deposit",
-          args: [amountWei],
+          functionName: "depositAndBridge",
+          args: [
+            ADDRESSES.ethereum.usdc,
+            amountWei,
+            BigInt(0),
+            user.safeAddress,
+            encodeAbiParameters(parseAbiParameters("uint32"), [30138]),
+            ADDRESSES.ethereum.nativeFeeToken,
+            fee ? (fee * BigInt(12)) / BigInt(10) : BigInt(0),
+          ],
         }),
-        value: '0'
-      }
+        value: fee?.toString() || "0",
+      };
 
       const safeOperation = await safe4337Pack.createTransaction({
-        transactions: [depositTransaction]
-      })
-      const signedSafeOperation = await safe4337Pack.signSafeOperation(safeOperation)
+        transactions: [depositTransaction],
+      });
+      const signedSafeOperation = await safe4337Pack.signSafeOperation(
+        safeOperation
+      );
 
       const userOperationHash = await safe4337Pack.executeTransaction({
-        executable: signedSafeOperation
-      })
-      const userOperationReceipt = await userOpReceipt(safe4337Pack, userOperationHash)
+        executable: signedSafeOperation,
+      });
+      const userOperationReceipt = await userOpReceipt(
+        safe4337Pack,
+        userOperationHash
+      );
       if (!userOperationReceipt.success) {
         throw new Error("User operation failed");
       }
 
-      const transactionHash = userOperationReceipt.receipt.transactionHash as Hash
-      const transaction = await publicClient(mainnet.id).waitForTransactionReceipt(
-        { hash: transactionHash }
-      )
-      if (transaction.status === 'success') {
+      const transactionHash = userOperationReceipt.receipt
+        .transactionHash as Hash;
+      const transaction = await publicClient(
+        mainnet.id
+      ).waitForTransactionReceipt({ hash: transactionHash });
+      if (transaction.status === "success") {
         setDepositStatus(Status.SUCCESS);
       } else {
         throw new Error("Deposit failed");

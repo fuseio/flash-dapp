@@ -35,7 +35,7 @@ const TokenCard = ({ amount, onAmountChange, balance, price }: TokenCardProps) =
       </div>
       <div className="text-sm font-medium opacity-40">
         {price ?
-          `Balance ${balance} WETH (≈ $${compactNumberFormat(Number(balance) * price)})` :
+          `Balance ${balance} USDC (≈ $${compactNumberFormat(Number(balance) * price)})` :
           <Skeleton className="w-40 h-5 rounded-sm" />
         }
       </div>

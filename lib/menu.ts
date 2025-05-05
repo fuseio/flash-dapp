@@ -13,4 +13,9 @@ export const menuItems = [
     href: path.DASHBOARD,
     icon: LayoutDashboard,
   },
+  {
+    label: "Buy Crypto",
+    href: path.BUY_CRYPTO,
+    icon: LayoutDashboard,
+  },
 ]

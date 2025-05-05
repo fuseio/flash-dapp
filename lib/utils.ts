@@ -22,6 +22,7 @@ export const path = {
   HOME: "/",
   DASHBOARD: "/dashboard",
   DEPOSIT: "/dashboard/deposit",
+  BUY_CRYPTO: "/dashboard/buy-crypto",
 }
 
 export function copyToClipboard(text: string) {

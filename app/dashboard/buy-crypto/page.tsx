@@ -4,7 +4,7 @@ import {MercuryoWidget} from "@/components/MercuryoWidget/MercuryoWidget";
 
 export default function Home() {
   return (
-    <main className="flex flex-col gap-20 max-w-2xl mx-auto px-4 pt-8 pb-20 md:py-16">
+    <main className="flex flex-col items-center gap-10 max-w-2xl mx-auto px-4 pb-20 md:py-16">
       <header className="flex flex-col gap-4">
         <h1 className="text-h1 leading-tight font-semibold">
           Buy Crypto Instantly
@@ -14,7 +14,7 @@ export default function Home() {
           Fast, secure, and deposited straight to your account.
         </p>
       </header>
-      <section className="flex flex-col gap-4 md:gap-10 h-[700px] sm:h-[500px] w-full">
+      <section className="flex flex-col items-center gap-4 md:gap-10 h-[700px] w-full">
         <MercuryoWidget />
       </section>
     </main>

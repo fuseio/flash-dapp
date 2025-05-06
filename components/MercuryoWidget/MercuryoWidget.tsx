@@ -36,5 +36,5 @@ export const MercuryoWidget = () => {
       if (containerRef.current) containerRef.current.innerHTML = "";
     };
   }, [user]);
-  return <div className="h-full w-full" ref={containerRef} />;
+  return <div className="min-h-[650px] max-w-[400px]" ref={containerRef} />;
 };

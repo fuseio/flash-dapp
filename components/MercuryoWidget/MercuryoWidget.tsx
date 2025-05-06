@@ -11,7 +11,6 @@ declare global {
 export const MercuryoWidget = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const {user} = useUser();
-  console.log(NEXT_PUBLIC_MERCURYO_WIDGET_SCRIPT_SRC);
 
   useEffect(() => {
     if (!window.mercuryoWidget) {

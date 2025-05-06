@@ -27,6 +27,9 @@ export const ADDRESSES: ADDRESSES = {
   }
 };
 
+export const NEXT_PUBLIC_MERCURYO_WIDGET_SCRIPT_SRC = process.env.NEXT_PUBLIC_MERCURYO_WIDGET_SCRIPT_SRC ?? "";
+export const NEXT_PUBLIC_MERCURYO_WIDGET_ID = process.env.NEXT_PUBLIC_MERCURYO_WIDGET_ID ?? "";
+export const NEXT_PUBLIC_MERCURYO_WIDGET_SDK_TOKEN = process.env.NEXT_PUBLIC_MERCURYO_WIDGET_SDK_TOKEN ?? "";
 export const GENERATE_SOURCEMAP = process.env.GENERATE_SOURCEMAP ?? ""
 export const NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ?? ""
 export const NEXT_PUBLIC_ETHEREUM_API_KEY = process.env.NEXT_PUBLIC_ETHEREUM_API_KEY ?? ""
@@ -40,3 +43,15 @@ export const USER = {
   passkeyStorageKey: 'flash_passkey_list',
   pimlicoUrl: `https://api.pimlico.io/v2/${mainnet.id}/rpc?apikey=${NEXT_PUBLIC_PIMLICO_API_KEY}`,
 }
+
+export const mercuryoWidgetConfig = {
+  widgetId: NEXT_PUBLIC_MERCURYO_WIDGET_ID,
+  sdkToken: NEXT_PUBLIC_MERCURYO_WIDGET_SDK_TOKEN,
+  fiatAmount: 100,
+  currency: "ETH",
+  paymentMethod: "google",
+  currencies: ["ETH"],
+  fiatCurrency: "USD",
+  lang: "en",
+  theme: "light",
+};

@@ -49,7 +49,7 @@ export const MercuryoWidget = () => {
             address: user.safeAddress,
             host: containerRef.current,
             signature: fullSignature,
-            merchant_transaction_id: merchantTransactionId,
+            merchantTransactionId: merchantTransactionId,
           });
 
           console.log("Widget initialized:", result);

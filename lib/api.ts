@@ -78,3 +78,13 @@ export const fetchTokenPriceUsd = async (token: string) => {
   })
   return response.data[token].usd;
 }
+
+export const getClientIp = async () => {
+  try {
+    const response = await axios.get("https://api.ipify.org?format=json")
+    return response.data.ip
+  } catch (error) {
+    console.error("Error fetching IP from ipify:", error);
+  }
+}
+

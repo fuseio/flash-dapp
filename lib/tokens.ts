@@ -6,20 +6,20 @@ import { TokenMap } from "./types";
 export const TOKEN_MAP: TokenMap = {
   [mainnet.id]: [
     {
-      name: "WETH",
-      address: ADDRESSES.ethereum.weth,
-      symbol: "WETH",
-      decimals: 18,
-      image: "/eth.svg",
-      coingeckoId: "weth",
-    },
-    {
       name: "USDC",
       address: ADDRESSES.ethereum.usdc,
       symbol: "USDC",
       decimals: 6,
       image: "/usdc.svg",
       coingeckoId: "usd-coin",
+    },
+    {
+      name: "WETH",
+      address: ADDRESSES.ethereum.weth,
+      symbol: "WETH",
+      decimals: 18,
+      image: "/eth.svg",
+      coingeckoId: "weth",
       isComingSoon: true,
     },
     {

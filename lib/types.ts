@@ -1,6 +1,5 @@
 import { PasskeyCoordinates } from "@safe-global/protocol-kit"
 import { Address } from "viem"
-import type { RegistrationResponseJSON } from "@simplewebauthn/browser"
 
 export enum Status {
   IDLE = "idle",
@@ -16,10 +15,6 @@ export interface User {
     rawId: string
     coordinates: PasskeyCoordinates
   }
-}
-
-export interface RegistrationResponse extends RegistrationResponseJSON {
-  safeAddress: Address
 }
 
 export interface TokenTransfer {

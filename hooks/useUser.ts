@@ -1,24 +1,15 @@
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { PasskeyArgType } from "@safe-global/protocol-kit";
-import { Safe4337Pack } from "@safe-global/relay-kit";
-import { mainnet } from "viem/chains";
-import {
-  startAuthentication,
-  startRegistration,
-} from "@simplewebauthn/browser";
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { PasskeyArgType } from "@safe-global/protocol-kit"
+import { Safe4337Pack } from '@safe-global/relay-kit'
+import { mainnet } from "viem/chains"
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 
-import { ADDRESSES, USER } from "@/lib/config";
-import { Status, User } from "@/lib/types";
-import { path, withRefreshToken } from "@/lib/utils";
-import { rpcUrls } from "@/lib/wagmi";
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthentication,
-  verifyRegistration,
-} from "@/lib/api";
-import { extractPasskeyData } from "@/lib/passkeys";
+import { USER } from "@/lib/config"
+import { Status, User } from "@/lib/types"
+import { path, withRefreshToken } from "@/lib/utils"
+import { rpcUrls } from "@/lib/wagmi"
+import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthentication, verifyRegistration } from "@/lib/api"
 
 const initUser = {
   username: "",
@@ -80,12 +71,8 @@ const useUser = () => {
       const optionsJSON = await generateRegistrationOptions(username);
       const authenticatorReponse = await startRegistration({ optionsJSON });
 
-      const passkey = await extractPasskeyData(authenticatorReponse);
-      const safe4337Pack = await safeAA(passkey);
-
-      const safeAddress = await safe4337Pack.protocolKit.getAddress();
       const user = await withRefreshToken(
-        verifyRegistration({ safeAddress, ...authenticatorReponse }),
+        verifyRegistration(authenticatorReponse),
         { onError: handleLogin }
       );
 

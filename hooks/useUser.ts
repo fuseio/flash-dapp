@@ -113,7 +113,7 @@ const useUser = () => {
       }
     } catch (error) {
       console.error(error);
-      setLoginStatus(Status.ERROR);
+      setLoginStatus(error);
     }
   }
 

@@ -65,11 +65,14 @@ export default function Home() {
             variant="outline"
             className="rounded-twice"
           >
-            {loginStatus === Status.ERROR ?
-              'Error logging in' :
-              loginStatus === Status.PENDING ?
-                'Logging in' :
-                'Login'
+            {
+              typeof loginStatus === 'string' ?
+                loginStatus :
+                loginStatus === Status.ERROR ?
+                  'Error logging in' :
+                  loginStatus === Status.PENDING ?
+                    'Logging in' :
+                    'Login'
             }
             {loginStatus === Status.PENDING && <Loader2 className='size-4 animate-spin' />}
           </Button>

@@ -18,6 +18,7 @@ import { ADDRESSES } from "@/lib/config";
 import { Status } from "@/lib/types";
 import useUser from "./useUser";
 import { publicClient } from "@/lib/wagmi";
+import { BaseSafeOperation } from "@safe-global/relay-kit";
 
 type DepositResult = {
   allowance: bigint | undefined;
@@ -146,32 +147,63 @@ const useDeposit = (): DepositResult => {
         throw new Error("Insufficient USDC balance");
       }
 
+      let safeOperation: BaseSafeOperation;
+      let transactions: any[] = [];
+      const safe4337Pack = await safeAA(user.passkey);
       if (allowance && allowance < amountWei) {
-        throw new Error("Insufficient allowance. Please approve first.");
+        const approveTransaction = {
+          to: ADDRESSES.ethereum.usdc,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [ADDRESSES.ethereum.vault, amountWei],
+          }),
+          value: "0",
+        };
+
+        const depositTransaction = {
+          to: ADDRESSES.ethereum.teller,
+          data: encodeFunctionData({
+            abi: ETHEREUM_TELLER_ABI,
+            functionName: "depositAndBridge",
+            args: [
+              ADDRESSES.ethereum.usdc,
+              amountWei,
+              BigInt(0),
+              user.safeAddress,
+              encodeAbiParameters(parseAbiParameters("uint32"), [30138]),
+              ADDRESSES.ethereum.nativeFeeToken,
+              fee ? (fee * BigInt(12)) / BigInt(10) : BigInt(0),
+            ],
+          }),
+          value: fee?.toString() || "0",
+        };
+
+        transactions.push(approveTransaction, depositTransaction);
+      } else {
+        const depositTransaction = {
+          to: ADDRESSES.ethereum.teller,
+          data: encodeFunctionData({
+            abi: ETHEREUM_TELLER_ABI,
+            functionName: "depositAndBridge",
+            args: [
+              ADDRESSES.ethereum.usdc,
+              amountWei,
+              BigInt(0),
+              user.safeAddress,
+              encodeAbiParameters(parseAbiParameters("uint32"), [30138]),
+              ADDRESSES.ethereum.nativeFeeToken,
+              fee ? (fee * BigInt(12)) / BigInt(10) : BigInt(0),
+            ],
+          }),
+          value: fee?.toString() || "0",
+        };
+
+        transactions.push(depositTransaction);
       }
 
-      const safe4337Pack = await safeAA(user.passkey);
-
-      const depositTransaction = {
-        to: ADDRESSES.ethereum.teller,
-        data: encodeFunctionData({
-          abi: ETHEREUM_TELLER_ABI,
-          functionName: "depositAndBridge",
-          args: [
-            ADDRESSES.ethereum.usdc,
-            amountWei,
-            BigInt(0),
-            user.safeAddress,
-            encodeAbiParameters(parseAbiParameters("uint32"), [30138]),
-            ADDRESSES.ethereum.nativeFeeToken,
-            fee ? (fee * BigInt(12)) / BigInt(10) : BigInt(0),
-          ],
-        }),
-        value: fee?.toString() || "0",
-      };
-
-      const safeOperation = await safe4337Pack.createTransaction({
-        transactions: [depositTransaction],
+      safeOperation = await safe4337Pack.createTransaction({
+        transactions,
       });
       const signedSafeOperation = await safe4337Pack.signSafeOperation(
         safeOperation

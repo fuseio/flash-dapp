@@ -28,7 +28,7 @@ const useUser = () => {
     status: Status;
     message?: string;
   }>({ status: Status.IDLE, message: "" });
-  const [loginStatus, setLoginStatus] = useState<Status>(Status.IDLE);
+  const [loginStatus, setLoginStatus] = useState<any>(Status.IDLE);
   const [userStatus, setUserStatus] = useState<Status>(Status.IDLE);
   const [user, setUser] = useState<User>();
   const router = useRouter();
@@ -113,7 +113,7 @@ const useUser = () => {
       }
     } catch (error) {
       console.error(error);
-      setLoginStatus(error);
+      setLoginStatus(JSON.stringify(error));
     }
   }
 
